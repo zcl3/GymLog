@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.personal.gymlog.data.local.entity.Exercise
@@ -30,19 +31,23 @@ import com.personal.gymlog.data.local.entity.SetRecord
 import com.personal.gymlog.data.local.entity.WorkoutExercise
 import com.personal.gymlog.data.local.entity.WorkoutSession
 import com.personal.gymlog.data.repository.GymLogRepository
+import androidx.navigation.NavController
+import java.time.LocalDate
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
-fun WorkoutScreen(repository: GymLogRepository) {
+fun WorkoutScreen(repository: GymLogRepository, navController: NavController) {
     val scope = rememberCoroutineScope()
     var session by remember { mutableStateOf<WorkoutSession?>(null) }
     var exercises by remember { mutableStateOf<List<WorkoutExercise>>(emptyList()) }
     var available by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var showAdd by remember { mutableStateOf(false) }
+    val todayWorkouts by repository.observeWorkouts(LocalDate.now().toString()).collectAsStateWithLifecycle(emptyList())
     LaunchedEffect(Unit) { session = repository.inProgress(); available = repository.allExercises(); session?.let { exercises = repository.exercises(it.id) } }
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("训练", style = MaterialTheme.typography.headlineLarge)
+        TextButton(onClick = { navController.navigate("home") }) { Text("返回首页") }
         if (session == null) {
             Text("开始一次新的训练，记录每个动作和组数。", color = MaterialTheme.colorScheme.onSurfaceVariant)
             Button(onClick = { scope.launch { val id = repository.startWorkout("我的训练"); session = repository.inProgress(); exercises = repository.exercises(id) } }) { Text("开始新训练") }
@@ -56,6 +61,7 @@ fun WorkoutScreen(repository: GymLogRepository) {
                 item { Button(onClick = { scope.launch { repository.completeWorkout(session!!.id); session = null; exercises = emptyList() } }, Modifier.fillMaxWidth()) { Text("完成训练") } }
             }
         }
+        if (session == null && todayWorkouts.isNotEmpty()) Text("今日记录：${todayWorkouts.joinToString { it.name }}")
     }
     if (showAdd && session != null) AddExerciseDialog(available, { showAdd = false }, { exercise -> scope.launch { repository.addWorkoutExercise(session!!.id, exercise, exercises.size); exercises = repository.exercises(session!!.id); showAdd = false } })
 }

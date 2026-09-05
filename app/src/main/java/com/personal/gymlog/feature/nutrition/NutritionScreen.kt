@@ -23,16 +23,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.personal.gymlog.data.local.entity.FoodEntry
 import com.personal.gymlog.data.repository.GymLogRepository
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
-fun NutritionScreen(repository: GymLogRepository) {
+fun NutritionScreen(repository: GymLogRepository, navController: NavController) {
     val foods by repository.observeFoods().collectAsStateWithLifecycle(emptyList())
     val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("饮食")
+        TextButton(onClick = { navController.navigate("home") }) { Text("返回首页") }
         Button(onClick = { showDialog = true }, Modifier.fillMaxWidth()) { Text("添加食物") }
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) { items(foods, key = { it.id }) { FoodRow(it) { scope.launch { repository.deleteFood(it.id) } } } }
     }

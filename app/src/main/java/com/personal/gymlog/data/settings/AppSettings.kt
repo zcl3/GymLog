@@ -8,4 +8,6 @@ data class AppSettings(
     val reminderStartMinutes: Int = 9 * 60,
     val reminderEndMinutes: Int = 22 * 60,
     val reminderIntervalMinutes: Int = 90,
+    val currentDate: String? = null,
+    val fontScale: Float = 1f,
 )

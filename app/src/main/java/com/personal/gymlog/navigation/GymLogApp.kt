@@ -34,10 +34,10 @@ fun GymLogApp() {
             modifier = Modifier.padding(paddingValues),
         ) {
             composable(AppDestination.Home.route) { HomeScreen(navController, repository, settingsRepository) }
-            composable(AppDestination.Workout.route) { WorkoutScreen(repository) }
+            composable(AppDestination.Workout.route) { WorkoutScreen(repository, navController) }
             composable(AppDestination.History.route) { HistoryScreen(repository) }
-            composable(AppDestination.Nutrition.route) { NutritionScreen(repository) }
-            composable(AppDestination.Water.route) { WaterScreen(repository, settingsRepository) }
+            composable(AppDestination.Nutrition.route) { NutritionScreen(repository, navController) }
+            composable(AppDestination.Water.route) { WaterScreen(repository, settingsRepository, navController) }
             composable(AppDestination.More.route) { MoreScreen(navController, repository) }
             composable(AppDestination.Exercises.route) { ExerciseLibraryScreen(repository) }
             composable(AppDestination.Templates.route) { TemplateScreen(repository) }
