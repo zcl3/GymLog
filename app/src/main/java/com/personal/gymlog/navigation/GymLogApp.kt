@@ -28,7 +28,7 @@ fun GymLogApp() {
             modifier = Modifier.padding(paddingValues),
         ) {
             composable(AppDestination.Home.route) { HomeScreen(navController) }
-            composable(AppDestination.Workout.route) { WorkoutScreen(navController) }
+            composable(AppDestination.Workout.route) { WorkoutScreen(repository) }
             composable(AppDestination.Nutrition.route) { NutritionScreen(navController) }
             composable(AppDestination.Water.route) { WaterScreen(navController) }
             composable(AppDestination.More.route) { MoreScreen(navController) }

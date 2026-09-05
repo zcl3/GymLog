@@ -2,8 +2,14 @@ package com.personal.gymlog.data.repository
 
 import com.personal.gymlog.data.local.AppDatabase
 import com.personal.gymlog.data.local.entity.Exercise
+import com.personal.gymlog.data.local.entity.SetRecord
+import com.personal.gymlog.data.local.entity.WorkoutExercise
+import com.personal.gymlog.data.local.entity.WorkoutSession
+import java.time.ZoneId
+import java.time.LocalDate
 import com.personal.gymlog.data.local.seed.BuiltInExerciseSeed
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class GymLogRepository(private val database: AppDatabase) {
     fun observeExercises(): Flow<List<Exercise>> = database.exerciseDao().observeActive()
@@ -12,5 +18,17 @@ class GymLogRepository(private val database: AppDatabase) {
         if (!exercise.isBuiltIn) database.exerciseDao().update(exercise)
     }
     suspend fun archiveExercise(id: Long) = database.exerciseDao().archive(id)
+    suspend fun allExercises(): List<Exercise> = database.exerciseDao().getAllActive()
+    suspend fun startWorkout(name: String): Long {
+        val now = System.currentTimeMillis()
+        return database.workoutDao().insertSession(WorkoutSession(name = name, startedAt = now, trainingDate = LocalDate.now().toString(), zoneId = ZoneId.systemDefault().id))
+    }
+    suspend fun inProgress(): WorkoutSession? = database.workoutDao().observeInProgress().first()
+    suspend fun exercises(sessionId: Long): List<WorkoutExercise> = database.workoutDao().getExercises(sessionId)
+    suspend fun addWorkoutExercise(sessionId: Long, exercise: Exercise, position: Int): Long = database.workoutDao().insertExercise(WorkoutExercise(sessionId = sessionId, exerciseId = exercise.id, nameSnapshot = exercise.name, bodyPartSnapshot = exercise.bodyPart, position = position))
+    suspend fun sets(workoutExerciseId: Long): List<SetRecord> = database.workoutDao().getSets(workoutExerciseId)
+    suspend fun addSet(workoutExerciseId: Long, position: Int): Long = database.workoutDao().insertSet(SetRecord(workoutExerciseId = workoutExerciseId, position = position, weightGrams = 0, reps = 0))
+    suspend fun updateSet(record: SetRecord, weightGrams: Int, reps: Int, completed: Boolean) = database.workoutDao().updateSet(record.id, weightGrams, reps, completed, if (completed) System.currentTimeMillis() else null)
+    suspend fun completeWorkout(id: Long) = database.workoutDao().complete(id, System.currentTimeMillis())
     suspend fun seedBuiltInExercises() = BuiltInExerciseSeed.ensureSeeded(database.exerciseDao())
 }

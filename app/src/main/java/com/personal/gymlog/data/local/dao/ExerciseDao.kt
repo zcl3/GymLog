@@ -16,4 +16,5 @@ interface ExerciseDao {
     @Update suspend fun update(exercise: Exercise)
     @Query("UPDATE Exercise SET isArchived = 1, updatedAt = :updatedAt WHERE id = :id AND isBuiltIn = 0") suspend fun archive(id: Long, updatedAt: Long = System.currentTimeMillis())
     @Query("SELECT id FROM Exercise WHERE seedKey = :seedKey LIMIT 1") suspend fun findIdBySeedKey(seedKey: String): Long?
+    @Query("SELECT * FROM Exercise WHERE isArchived = 0 ORDER BY bodyPart, name") suspend fun getAllActive(): List<Exercise>
 }
