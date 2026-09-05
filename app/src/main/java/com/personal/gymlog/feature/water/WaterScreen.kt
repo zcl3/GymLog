@@ -24,14 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.personal.gymlog.data.local.entity.WaterEntry
 import com.personal.gymlog.data.repository.GymLogRepository
+import com.personal.gymlog.data.settings.SettingsRepository
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
-fun WaterScreen(repository: GymLogRepository) {
+fun WaterScreen(repository: GymLogRepository, settingsRepository: SettingsRepository) {
     val entries by repository.observeWater().collectAsStateWithLifecycle(emptyList())
     val scope = rememberCoroutineScope(); var custom by remember { mutableStateOf(false) }
-    val total = entries.sumOf { it.amountMl }; val goal = 2500; val percent = if (goal == 0) 0 else total * 100 / goal
+    val settings by settingsRepository.settings.collectAsStateWithLifecycle(com.personal.gymlog.data.settings.AppSettings()); val total = entries.sumOf { it.amountMl }; val goal = settings.dailyWaterGoalMl; val percent = if (goal == 0) 0 else total * 100 / goal
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("喝水"); Text("$total / $goal ml"); Text("$percent%")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { listOf(100, 250, 500).forEach { amount -> Button(onClick = { scope.launch { repository.addWater(amount) } }) { Text("+$amount ml") } } }

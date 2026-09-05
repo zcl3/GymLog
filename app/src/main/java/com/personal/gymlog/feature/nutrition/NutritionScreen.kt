@@ -36,14 +36,14 @@ fun NutritionScreen(repository: GymLogRepository) {
         Button(onClick = { showDialog = true }, Modifier.fillMaxWidth()) { Text("添加食物") }
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) { items(foods, key = { it.id }) { FoodRow(it) { scope.launch { repository.deleteFood(it.id) } } } }
     }
-    if (showDialog) FoodDialog({ showDialog = false }) { name, meal, kcal -> scope.launch { repository.addFood(name, meal, kcal, null, null, null); showDialog = false } }
+    if (showDialog) FoodDialog({ showDialog = false }) { name, meal, kcal, protein -> scope.launch { repository.addFood(name, meal, kcal, protein, null, null); showDialog = false } }
 }
 
 @Composable private fun FoodRow(food: FoodEntry, onDelete: (FoodEntry) -> Unit) {
     Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(14.dp)) { Text("${food.mealType} · ${food.name}"); food.caloriesKcal?.let { Text("${it} kcal") }; TextButton(onClick = { onDelete(food) }) { Text("删除") } } }
 }
 
-@Composable private fun FoodDialog(onDismiss: () -> Unit, onSave: (String, String, Double?) -> Unit) {
-    var name by remember { mutableStateOf("") }; var meal by remember { mutableStateOf("早餐") }; var kcal by remember { mutableStateOf("") }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("添加食物") }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { OutlinedTextField(name, { name = it }, label = { Text("食物名称") }, singleLine = true); OutlinedTextField(meal, { meal = it }, label = { Text("餐次") }, singleLine = true); OutlinedTextField(kcal, { kcal = it }, label = { Text("热量 kcal（可选）") }, singleLine = true) } }, confirmButton = { Button(enabled = name.isNotBlank(), onClick = { onSave(name, meal, kcal.toDoubleOrNull()) }) { Text("保存") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
+@Composable private fun FoodDialog(onDismiss: () -> Unit, onSave: (String, String, Double?, Double?) -> Unit) {
+    var name by remember { mutableStateOf("") }; var meal by remember { mutableStateOf("早餐") }; var kcal by remember { mutableStateOf("") }; var protein by remember { mutableStateOf("") }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("添加食物") }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { OutlinedTextField(name, { name = it }, label = { Text("食物名称") }, singleLine = true); OutlinedTextField(meal, { meal = it }, label = { Text("餐次") }, singleLine = true); OutlinedTextField(kcal, { kcal = it }, label = { Text("热量 kcal（可选）") }, singleLine = true); OutlinedTextField(protein, { protein = it }, label = { Text("蛋白质 g（可选）") }, singleLine = true) } }, confirmButton = { Button(enabled = name.isNotBlank(), onClick = { onSave(name, meal, kcal.toDoubleOrNull(), protein.toDoubleOrNull()) }) { Text("保存") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } })
 }

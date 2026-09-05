@@ -17,6 +17,7 @@ interface WorkoutDao {
     @Insert suspend fun insertSet(record: SetRecord): Long
     @Query("SELECT * FROM WorkoutSession WHERE status = 'IN_PROGRESS' ORDER BY startedAt DESC LIMIT 1") fun observeInProgress(): Flow<WorkoutSession?>
     @Query("SELECT * FROM WorkoutSession WHERE status = 'COMPLETED' ORDER BY trainingDate DESC, startedAt DESC") fun observeHistory(): Flow<List<WorkoutSession>>
+    @Query("SELECT * FROM WorkoutSession WHERE trainingDate = :date ORDER BY startedAt DESC") fun observeDate(date: String): Flow<List<WorkoutSession>>
     @Query("SELECT * FROM WorkoutSession WHERE id = :id") suspend fun getSession(id: Long): WorkoutSession?
     @Query("SELECT * FROM WorkoutExercise WHERE sessionId = :sessionId ORDER BY position") suspend fun getExercises(sessionId: Long): List<WorkoutExercise>
     @Query("SELECT * FROM SetRecord WHERE workoutExerciseId = :workoutExerciseId ORDER BY position") suspend fun getSets(workoutExerciseId: Long): List<SetRecord>
