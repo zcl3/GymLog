@@ -5,6 +5,7 @@ import com.personal.gymlog.data.local.entity.Exercise
 import com.personal.gymlog.data.local.entity.SetRecord
 import com.personal.gymlog.data.local.entity.WorkoutExercise
 import com.personal.gymlog.data.local.entity.WorkoutSession
+import com.personal.gymlog.data.local.entity.WorkoutTemplate
 import java.time.ZoneId
 import java.time.LocalDate
 import com.personal.gymlog.data.local.seed.BuiltInExerciseSeed
@@ -31,5 +32,8 @@ class GymLogRepository(private val database: AppDatabase) {
     suspend fun updateSet(record: SetRecord, weightGrams: Int, reps: Int, completed: Boolean) = database.workoutDao().updateSet(record.id, weightGrams, reps, completed, if (completed) System.currentTimeMillis() else null)
     suspend fun completeWorkout(id: Long) = database.workoutDao().complete(id, System.currentTimeMillis())
     fun observeHistory(): Flow<List<WorkoutSession>> = database.workoutDao().observeHistory()
+    fun observeTemplates(): Flow<List<WorkoutTemplate>> = database.templateDao().observeAll()
+    suspend fun addTemplate(name: String) = database.templateDao().insert(WorkoutTemplate(name = name.trim()))
+    suspend fun deleteTemplate(id: Long) = database.templateDao().delete(id)
     suspend fun seedBuiltInExercises() = BuiltInExerciseSeed.ensureSeeded(database.exerciseDao())
 }

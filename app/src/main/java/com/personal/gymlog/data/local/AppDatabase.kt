@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.personal.gymlog.data.local.dao.ExerciseDao
 import com.personal.gymlog.data.local.dao.WorkoutDao
+import com.personal.gymlog.data.local.dao.TemplateDao
 import com.personal.gymlog.data.local.entity.Exercise
 import com.personal.gymlog.data.local.entity.FavoriteFood
 import com.personal.gymlog.data.local.entity.FoodEntry
@@ -20,6 +21,7 @@ import com.personal.gymlog.data.local.entity.WorkoutTemplateExercise
 abstract class AppDatabase : RoomDatabase() {
     abstract fun exerciseDao(): ExerciseDao
     abstract fun workoutDao(): WorkoutDao
+    abstract fun templateDao(): TemplateDao
 
     companion object {
         fun create(context: Context): AppDatabase = Room.databaseBuilder(context, AppDatabase::class.java, "gymlog.db").build()

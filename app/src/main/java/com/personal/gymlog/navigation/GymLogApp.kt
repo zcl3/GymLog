@@ -14,6 +14,7 @@ import com.personal.gymlog.feature.home.HomeScreen
 import com.personal.gymlog.feature.history.HistoryScreen
 import com.personal.gymlog.feature.more.MoreScreen
 import com.personal.gymlog.feature.nutrition.NutritionScreen
+import com.personal.gymlog.feature.template.TemplateScreen
 import com.personal.gymlog.feature.water.WaterScreen
 import com.personal.gymlog.feature.workout.WorkoutScreen
 import com.personal.gymlog.ui.components.GymLogBottomBar
@@ -35,7 +36,8 @@ fun GymLogApp() {
             composable(AppDestination.Water.route) { WaterScreen(navController) }
             composable(AppDestination.More.route) { MoreScreen(navController) }
             composable(AppDestination.Exercises.route) { ExerciseLibraryScreen(repository) }
-            listOf(AppDestination.Statistics, AppDestination.Templates, AppDestination.Settings)
+            composable(AppDestination.Templates.route) { TemplateScreen(repository) }
+            listOf(AppDestination.Statistics, AppDestination.Settings)
                 .forEach { destination -> composable(destination.route) { PlaceholderScreen(destination.label) } }
         }
     }
