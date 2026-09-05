@@ -7,6 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.platform.LocalContext
+import com.personal.gymlog.GymLogApplication
+import com.personal.gymlog.feature.exercise.ExerciseLibraryScreen
 import com.personal.gymlog.feature.home.HomeScreen
 import com.personal.gymlog.feature.more.MoreScreen
 import com.personal.gymlog.feature.nutrition.NutritionScreen
@@ -17,6 +20,7 @@ import com.personal.gymlog.ui.components.GymLogBottomBar
 @Composable
 fun GymLogApp() {
     val navController = rememberNavController()
+    val repository = (LocalContext.current.applicationContext as GymLogApplication).repository
     Scaffold(bottomBar = { GymLogBottomBar(navController) }) { paddingValues ->
         NavHost(
             navController = navController,
@@ -28,7 +32,8 @@ fun GymLogApp() {
             composable(AppDestination.Nutrition.route) { NutritionScreen(navController) }
             composable(AppDestination.Water.route) { WaterScreen(navController) }
             composable(AppDestination.More.route) { MoreScreen(navController) }
-            listOf(AppDestination.Statistics, AppDestination.Exercises, AppDestination.Templates, AppDestination.Settings)
+            composable(AppDestination.Exercises.route) { ExerciseLibraryScreen(repository) }
+            listOf(AppDestination.Statistics, AppDestination.Templates, AppDestination.Settings)
                 .forEach { destination -> composable(destination.route) { PlaceholderScreen(destination.label) } }
         }
     }
