@@ -28,6 +28,7 @@ class GymLogRepository(private val database: AppDatabase) {
     }
     suspend fun inProgress(): WorkoutSession? = database.workoutDao().observeInProgress().first()
     suspend fun exercises(sessionId: Long): List<WorkoutExercise> = database.workoutDao().getExercises(sessionId)
+    suspend fun workoutDetails(sessionId: Long) = database.workoutDao().getDetails(sessionId)
     suspend fun addWorkoutExercise(sessionId: Long, exercise: Exercise, position: Int): Long = database.workoutDao().insertExercise(WorkoutExercise(sessionId = sessionId, exerciseId = exercise.id, nameSnapshot = exercise.name, bodyPartSnapshot = exercise.bodyPart, position = position))
     suspend fun sets(workoutExerciseId: Long): List<SetRecord> = database.workoutDao().getSets(workoutExerciseId)
     suspend fun addSet(workoutExerciseId: Long, position: Int): Long = database.workoutDao().insertSet(SetRecord(workoutExerciseId = workoutExerciseId, position = position, weightGrams = 0, reps = 0))
