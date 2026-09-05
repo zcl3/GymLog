@@ -36,7 +36,6 @@ fun WaterScreen(repository: GymLogRepository, settingsRepository: SettingsReposi
     val settings by settingsRepository.settings.collectAsStateWithLifecycle(com.personal.gymlog.data.settings.AppSettings()); val total = entries.sumOf { it.amountMl }; val goal = settings.dailyWaterGoalMl; val percent = if (goal == 0) 0 else total * 100 / goal
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("喝水"); Text("$total / $goal ml"); Text("$percent%")
-        TextButton(onClick = { navController.navigate("home") }) { Text("返回首页") }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { listOf(100, 250, 500).forEach { amount -> Button(onClick = { scope.launch { repository.addWater(amount) } }) { Text("+$amount ml") } } }
         Button(onClick = { custom = true }, Modifier.fillMaxWidth()) { Text("自定义饮水量") }
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) { items(entries, key = { it.id }) { WaterRow(it) { scope.launch { repository.deleteWater(it.id) } } } }

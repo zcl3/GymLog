@@ -6,6 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.personal.gymlog.navigation.bottomDestinations
@@ -19,7 +20,7 @@ fun GymLogBottomBar(navController: NavHostController) {
                 selected = currentDestination?.hierarchy?.any { it.route == item.destination.route } == true,
                 onClick = {
                     navController.navigate(item.destination.route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
