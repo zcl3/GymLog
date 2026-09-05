@@ -50,6 +50,7 @@ fun WorkoutScreen(repository: GymLogRepository) {
         } else {
             Text(session!!.name, style = MaterialTheme.typography.titleLarge)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                item { RestTimer() }
                 items(exercises, key = { it.id }) { exercise -> ExerciseCard(repository, exercise) }
                 item { OutlinedButton(onClick = { showAdd = true }, Modifier.fillMaxWidth()) { Text("添加动作") } }
                 item { Button(onClick = { scope.launch { repository.completeWorkout(session!!.id); session = null; exercises = emptyList() } }, Modifier.fillMaxWidth()) { Text("完成训练") } }

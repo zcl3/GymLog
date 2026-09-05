@@ -32,7 +32,7 @@ fun GymLogApp() {
             composable(AppDestination.Home.route) { HomeScreen(navController) }
             composable(AppDestination.Workout.route) { WorkoutScreen(repository) }
             composable(AppDestination.History.route) { HistoryScreen(repository) }
-            composable(AppDestination.Nutrition.route) { NutritionScreen(navController) }
+            composable(AppDestination.Nutrition.route) { NutritionScreen(repository) }
             composable(AppDestination.Water.route) { WaterScreen(navController) }
             composable(AppDestination.More.route) { MoreScreen(navController) }
             composable(AppDestination.Exercises.route) { ExerciseLibraryScreen(repository) }

@@ -6,8 +6,9 @@ import com.personal.gymlog.data.local.entity.SetRecord
 import com.personal.gymlog.data.local.entity.WorkoutExercise
 import com.personal.gymlog.data.local.entity.WorkoutSession
 import com.personal.gymlog.data.local.entity.WorkoutTemplate
-import java.time.ZoneId
+import com.personal.gymlog.data.local.entity.FoodEntry
 import java.time.LocalDate
+import java.time.ZoneId
 import com.personal.gymlog.data.local.seed.BuiltInExerciseSeed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -35,5 +36,11 @@ class GymLogRepository(private val database: AppDatabase) {
     fun observeTemplates(): Flow<List<WorkoutTemplate>> = database.templateDao().observeAll()
     suspend fun addTemplate(name: String) = database.templateDao().insert(WorkoutTemplate(name = name.trim()))
     suspend fun deleteTemplate(id: Long) = database.templateDao().delete(id)
+    fun observeFoods(date: String = LocalDate.now().toString()): Flow<List<FoodEntry>> = database.foodDao().observeDate(date)
+    suspend fun addFood(name: String, mealType: String, calories: Double?, protein: Double?, carbs: Double?, fat: Double?) {
+        val now = System.currentTimeMillis()
+        database.foodDao().insert(FoodEntry(date = LocalDate.now().toString(), recordedAt = now, zoneId = ZoneId.systemDefault().id, mealType = mealType, name = name.trim(), caloriesKcal = calories, proteinGrams = protein, carbsGrams = carbs, fatGrams = fat))
+    }
+    suspend fun deleteFood(id: Long) = database.foodDao().delete(id)
     suspend fun seedBuiltInExercises() = BuiltInExerciseSeed.ensureSeeded(database.exerciseDao())
 }
