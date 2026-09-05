@@ -8,6 +8,7 @@ import com.personal.gymlog.data.local.dao.ExerciseDao
 import com.personal.gymlog.data.local.dao.WorkoutDao
 import com.personal.gymlog.data.local.dao.TemplateDao
 import com.personal.gymlog.data.local.dao.FoodDao
+import com.personal.gymlog.data.local.dao.WaterDao
 import com.personal.gymlog.data.local.entity.Exercise
 import com.personal.gymlog.data.local.entity.FavoriteFood
 import com.personal.gymlog.data.local.entity.FoodEntry
@@ -24,6 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutDao(): WorkoutDao
     abstract fun templateDao(): TemplateDao
     abstract fun foodDao(): FoodDao
+    abstract fun waterDao(): WaterDao
 
     companion object {
         fun create(context: Context): AppDatabase = Room.databaseBuilder(context, AppDatabase::class.java, "gymlog.db").build()

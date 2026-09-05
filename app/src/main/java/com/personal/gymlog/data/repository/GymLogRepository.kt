@@ -7,6 +7,7 @@ import com.personal.gymlog.data.local.entity.WorkoutExercise
 import com.personal.gymlog.data.local.entity.WorkoutSession
 import com.personal.gymlog.data.local.entity.WorkoutTemplate
 import com.personal.gymlog.data.local.entity.FoodEntry
+import com.personal.gymlog.data.local.entity.WaterEntry
 import java.time.LocalDate
 import java.time.ZoneId
 import com.personal.gymlog.data.local.seed.BuiltInExerciseSeed
@@ -42,5 +43,8 @@ class GymLogRepository(private val database: AppDatabase) {
         database.foodDao().insert(FoodEntry(date = LocalDate.now().toString(), recordedAt = now, zoneId = ZoneId.systemDefault().id, mealType = mealType, name = name.trim(), caloriesKcal = calories, proteinGrams = protein, carbsGrams = carbs, fatGrams = fat))
     }
     suspend fun deleteFood(id: Long) = database.foodDao().delete(id)
+    fun observeWater(date: String = LocalDate.now().toString()): Flow<List<WaterEntry>> = database.waterDao().observeDate(date)
+    suspend fun addWater(amountMl: Int) { val now = System.currentTimeMillis(); database.waterDao().insert(WaterEntry(amountMl = amountMl.coerceAtLeast(1), recordedAt = now, date = LocalDate.now().toString(), zoneId = ZoneId.systemDefault().id)) }
+    suspend fun deleteWater(id: Long) = database.waterDao().delete(id)
     suspend fun seedBuiltInExercises() = BuiltInExerciseSeed.ensureSeeded(database.exerciseDao())
 }
