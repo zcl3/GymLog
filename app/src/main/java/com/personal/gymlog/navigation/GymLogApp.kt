@@ -15,6 +15,9 @@ import com.personal.gymlog.feature.history.HistoryScreen
 import com.personal.gymlog.feature.more.MoreScreen
 import com.personal.gymlog.feature.nutrition.NutritionScreen
 import com.personal.gymlog.feature.template.TemplateScreen
+import com.personal.gymlog.feature.statistics.StatisticsScreen
+import com.personal.gymlog.data.settings.SettingsRepository
+import com.personal.gymlog.feature.settings.SettingsScreen
 import com.personal.gymlog.feature.water.WaterScreen
 import com.personal.gymlog.feature.workout.WorkoutScreen
 import com.personal.gymlog.ui.components.GymLogBottomBar
@@ -23,6 +26,7 @@ import com.personal.gymlog.ui.components.GymLogBottomBar
 fun GymLogApp() {
     val navController = rememberNavController()
     val repository = (LocalContext.current.applicationContext as GymLogApplication).repository
+    val settingsRepository = SettingsRepository(LocalContext.current.applicationContext)
     Scaffold(bottomBar = { GymLogBottomBar(navController) }) { paddingValues ->
         NavHost(
             navController = navController,
@@ -37,8 +41,8 @@ fun GymLogApp() {
             composable(AppDestination.More.route) { MoreScreen(navController) }
             composable(AppDestination.Exercises.route) { ExerciseLibraryScreen(repository) }
             composable(AppDestination.Templates.route) { TemplateScreen(repository) }
-            listOf(AppDestination.Statistics, AppDestination.Settings)
-                .forEach { destination -> composable(destination.route) { PlaceholderScreen(destination.label) } }
+            composable(AppDestination.Statistics.route) { StatisticsScreen(repository) }
+            composable(AppDestination.Settings.route) { SettingsScreen(settingsRepository) }
         }
     }
 }
