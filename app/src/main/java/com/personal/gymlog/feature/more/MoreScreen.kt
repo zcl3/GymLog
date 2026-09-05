@@ -16,6 +16,7 @@ import com.personal.gymlog.navigation.AppDestination
 @Composable
 fun MoreScreen(navController: NavController) {
     val entries = listOf(
+        AppDestination.History,
         AppDestination.Statistics,
         AppDestination.Exercises,
         AppDestination.Templates,

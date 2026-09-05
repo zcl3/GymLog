@@ -30,5 +30,6 @@ class GymLogRepository(private val database: AppDatabase) {
     suspend fun addSet(workoutExerciseId: Long, position: Int): Long = database.workoutDao().insertSet(SetRecord(workoutExerciseId = workoutExerciseId, position = position, weightGrams = 0, reps = 0))
     suspend fun updateSet(record: SetRecord, weightGrams: Int, reps: Int, completed: Boolean) = database.workoutDao().updateSet(record.id, weightGrams, reps, completed, if (completed) System.currentTimeMillis() else null)
     suspend fun completeWorkout(id: Long) = database.workoutDao().complete(id, System.currentTimeMillis())
+    fun observeHistory(): Flow<List<WorkoutSession>> = database.workoutDao().observeHistory()
     suspend fun seedBuiltInExercises() = BuiltInExerciseSeed.ensureSeeded(database.exerciseDao())
 }

@@ -18,6 +18,7 @@ sealed class AppDestination(val route: String, val label: String) {
     data object Exercises : AppDestination("exercises", "动作库")
     data object Templates : AppDestination("templates", "训练模板")
     data object Settings : AppDestination("settings", "设置")
+    data object History : AppDestination("history", "训练历史")
 }
 
 data class BottomDestination(val destination: AppDestination, val icon: ImageVector)

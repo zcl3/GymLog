@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.personal.gymlog.GymLogApplication
 import com.personal.gymlog.feature.exercise.ExerciseLibraryScreen
 import com.personal.gymlog.feature.home.HomeScreen
+import com.personal.gymlog.feature.history.HistoryScreen
 import com.personal.gymlog.feature.more.MoreScreen
 import com.personal.gymlog.feature.nutrition.NutritionScreen
 import com.personal.gymlog.feature.water.WaterScreen
@@ -29,6 +30,7 @@ fun GymLogApp() {
         ) {
             composable(AppDestination.Home.route) { HomeScreen(navController) }
             composable(AppDestination.Workout.route) { WorkoutScreen(repository) }
+            composable(AppDestination.History.route) { HistoryScreen(repository) }
             composable(AppDestination.Nutrition.route) { NutritionScreen(navController) }
             composable(AppDestination.Water.route) { WaterScreen(navController) }
             composable(AppDestination.More.route) { MoreScreen(navController) }

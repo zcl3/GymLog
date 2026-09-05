@@ -46,6 +46,7 @@ fun WorkoutScreen(repository: GymLogRepository) {
         if (session == null) {
             Text("开始一次新的训练，记录每个动作和组数。", color = MaterialTheme.colorScheme.onSurfaceVariant)
             Button(onClick = { scope.launch { val id = repository.startWorkout("我的训练"); session = repository.inProgress(); exercises = repository.exercises(id) } }) { Text("开始新训练") }
+            TextButton(onClick = { /* history is available from the training tab in the next navigation pass */ }) { Text("训练历史") }
         } else {
             Text(session!!.name, style = MaterialTheme.typography.titleLarge)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
