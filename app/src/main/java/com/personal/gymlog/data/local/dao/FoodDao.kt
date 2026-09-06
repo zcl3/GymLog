@@ -10,5 +10,6 @@ import kotlinx.coroutines.flow.Flow
 interface FoodDao {
     @Query("SELECT * FROM FoodEntry WHERE date = :date ORDER BY recordedAt DESC") fun observeDate(date: String): Flow<List<FoodEntry>>
     @Insert suspend fun insert(entry: FoodEntry): Long
+    @androidx.room.Update suspend fun update(entry: FoodEntry)
     @Query("DELETE FROM FoodEntry WHERE id = :id") suspend fun delete(id: Long)
 }

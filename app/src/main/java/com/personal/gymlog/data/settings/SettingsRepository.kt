@@ -40,7 +40,17 @@ class SettingsRepository(private val context: Context) {
     }
 
     suspend fun setUnit(unit: String) = context.settingsDataStore.edit { it[Keys.unit] = unit }
-    suspend fun setWaterGoalMl(goalMl: Int) = context.settingsDataStore.edit { it[Keys.waterGoal] = goalMl.coerceAtLeast(0) }
-    suspend fun setCurrentDate(date: String?) = context.settingsDataStore.edit { if (date.isNullOrBlank()) it.remove(Keys.currentDate) else it[Keys.currentDate] = date }
+    suspend fun setWaterGoalMl(goalMl: Int) {
+        require(goalMl in 100..20_000) { "每日饮水目标请填写 100–20000 ml" }
+        context.settingsDataStore.edit { it[Keys.waterGoal] = goalMl }
+    }
+    suspend fun setDefaultRestSeconds(seconds: Int) {
+        require(seconds in 10..3_600) { "休息时长请填写 10–3600 秒" }
+        context.settingsDataStore.edit { it[Keys.rest] = seconds }
+    }
+    suspend fun setCurrentDate(date: String?) {
+        if (date != null) require(runCatching { java.time.LocalDate.parse(date) }.isSuccess) { "日期格式无效" }
+        context.settingsDataStore.edit { if (date.isNullOrBlank()) it.remove(Keys.currentDate) else it[Keys.currentDate] = date }
+    }
     suspend fun setFontScale(scale: Float) = context.settingsDataStore.edit { it[Keys.fontScale] = scale.coerceIn(0.85f, 1.3f) }
 }

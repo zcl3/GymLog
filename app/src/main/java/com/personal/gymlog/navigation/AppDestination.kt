@@ -3,7 +3,6 @@ package com.personal.gymlog.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Dashboard
-import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,5 +27,4 @@ val bottomDestinations = listOf(
     BottomDestination(AppDestination.Workout, Icons.Outlined.CalendarMonth),
     BottomDestination(AppDestination.Nutrition, Icons.Outlined.Restaurant),
     BottomDestination(AppDestination.Water, Icons.Outlined.WaterDrop),
-    BottomDestination(AppDestination.More, Icons.Outlined.MoreHoriz),
 )

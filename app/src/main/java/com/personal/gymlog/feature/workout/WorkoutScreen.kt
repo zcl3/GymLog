@@ -31,35 +31,38 @@ import com.personal.gymlog.data.local.entity.SetRecord
 import com.personal.gymlog.data.local.entity.WorkoutExercise
 import com.personal.gymlog.data.local.entity.WorkoutSession
 import com.personal.gymlog.data.repository.GymLogRepository
-import androidx.navigation.NavController
-import java.time.LocalDate
+import com.personal.gymlog.data.settings.AppSettings
+import com.personal.gymlog.data.settings.SettingsRepository
+import com.personal.gymlog.data.settings.recordDate
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
-fun WorkoutScreen(repository: GymLogRepository, navController: NavController) {
+fun WorkoutScreen(repository: GymLogRepository, settingsRepository: SettingsRepository) {
     val scope = rememberCoroutineScope()
     var session by remember { mutableStateOf<WorkoutSession?>(null) }
     var exercises by remember { mutableStateOf<List<WorkoutExercise>>(emptyList()) }
     var available by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var showAdd by remember { mutableStateOf(false) }
-    val todayWorkouts by repository.observeWorkouts(LocalDate.now().toString()).collectAsStateWithLifecycle(emptyList())
+    val settings by settingsRepository.settings.collectAsStateWithLifecycle(AppSettings())
+    val selectedDate = settings.recordDate()
+    val todayWorkouts by repository.observeWorkouts(selectedDate).collectAsStateWithLifecycle(emptyList())
     LaunchedEffect(Unit) { session = repository.inProgress(); available = repository.allExercises(); session?.let { exercises = repository.exercises(it.id) } }
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("训练", style = MaterialTheme.typography.headlineLarge)
         if (session == null) {
             Text("开始一次新的训练，记录每个动作和组数。", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Button(onClick = { scope.launch { val id = repository.startWorkout("我的训练"); session = repository.inProgress(); exercises = repository.exercises(id) } }) { Text("开始新训练") }
+            Button(onClick = { scope.launch { val id = repository.startWorkout("我的训练", selectedDate); session = repository.inProgress(); exercises = repository.exercises(id) } }) { Text("开始新训练") }
         } else {
             Text(session!!.name, style = MaterialTheme.typography.titleLarge)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                item { RestTimer() }
+                item { RestTimer(settings.defaultRestSeconds.toLong()) }
                 items(exercises, key = { it.id }) { exercise -> ExerciseCard(repository, exercise) }
                 item { OutlinedButton(onClick = { showAdd = true }, Modifier.fillMaxWidth()) { Text("添加动作") } }
                 item { Button(onClick = { scope.launch { repository.completeWorkout(session!!.id); session = null; exercises = emptyList() } }, Modifier.fillMaxWidth()) { Text("完成训练") } }
             }
         }
-        if (session == null && todayWorkouts.isNotEmpty()) Text("今日记录：${todayWorkouts.joinToString { it.name }}")
+        if (session == null && todayWorkouts.isNotEmpty()) Text("$selectedDate 的记录：${todayWorkouts.joinToString { it.name }}")
     }
     if (showAdd && session != null) AddExerciseDialog(available, { showAdd = false }, { exercise -> scope.launch { repository.addWorkoutExercise(session!!.id, exercise, exercises.size); exercises = repository.exercises(session!!.id); showAdd = false } })
 }
@@ -82,11 +85,21 @@ private fun ExerciseCard(repository: GymLogRepository, exercise: WorkoutExercise
 private fun SetRow(set: SetRecord, onChange: (Int, Int, Boolean) -> Unit) {
     var weight by remember(set.id, set.weightGrams) { mutableStateOf(if (set.weightGrams == 0) "" else (set.weightGrams / 1000.0).toString()) }
     var reps by remember(set.id, set.reps) { mutableStateOf(if (set.reps == 0) "" else set.reps.toString()) }
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text("第${set.position + 1}组", Modifier.padding(top = 16.dp))
-        OutlinedTextField(weight, { weight = it }, Modifier.weight(1f), label = { Text("kg") }, singleLine = true)
-        OutlinedTextField(reps, { reps = it }, Modifier.weight(1f), label = { Text("次数") }, singleLine = true)
-        Checkbox(set.isCompleted, { onChange(((weight.toDoubleOrNull() ?: 0.0) * 1000).toInt(), reps.toIntOrNull() ?: 0, it) })
+    val weightGrams = (weight.toDoubleOrNull() ?: 0.0).times(1000).toInt()
+    val repetitions = reps.toIntOrNull() ?: 0
+    val valid = weight.toDoubleOrNull()?.let { it >= 0 && it.isFinite() } != false && repetitions > 0
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text("第${set.position + 1}组")
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            OutlinedTextField(weight, { weight = it }, Modifier.weight(1f), label = { Text("重量 kg（可空）") }, singleLine = true)
+            OutlinedTextField(reps, { reps = it }, Modifier.weight(1f), label = { Text("次数") }, singleLine = true)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Checkbox(set.isCompleted, { completed -> if (valid) onChange(weightGrams, repetitions, completed) })
+            Text("已完成", Modifier.padding(top = 12.dp))
+            Button(enabled = valid, onClick = { onChange(weightGrams, repetitions, set.isCompleted) }) { Text("保存本组") }
+        }
+        if (!valid) Text("请填写正整数次数；重量可留空或填写非负数", color = MaterialTheme.colorScheme.error)
     }
 }
 
