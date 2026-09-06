@@ -28,6 +28,7 @@ interface WorkoutDao {
     @Query("SELECT * FROM WorkoutExercise WHERE sessionId = :sessionId ORDER BY position") suspend fun getExercises(sessionId: Long): List<WorkoutExercise>
     @Query("SELECT * FROM SetRecord WHERE workoutExerciseId = :workoutExerciseId ORDER BY position") suspend fun getSets(workoutExerciseId: Long): List<SetRecord>
     @Query("UPDATE WorkoutSession SET status = 'COMPLETED', endedAt = :endedAt WHERE id = :id") suspend fun complete(id: Long, endedAt: Long)
+    @Query("DELETE FROM WorkoutSession WHERE id = :id") suspend fun deleteSession(id: Long)
     @Query("UPDATE SetRecord SET weightGrams = :weightGrams, reps = :reps, isCompleted = :completed, completedAt = :completedAt WHERE id = :id") suspend fun updateSet(id: Long, weightGrams: Int, reps: Int, completed: Boolean, completedAt: Long?)
     @Transaction
     @Query("SELECT * FROM WorkoutSession WHERE id = :id")

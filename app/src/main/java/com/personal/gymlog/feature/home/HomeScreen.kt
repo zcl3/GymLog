@@ -26,7 +26,7 @@ import com.personal.gymlog.data.repository.GymLogRepository
 import com.personal.gymlog.data.settings.AppSettings
 import com.personal.gymlog.data.settings.SettingsRepository
 import com.personal.gymlog.data.settings.recordDate
-import com.personal.gymlog.feature.workout.workoutStartTime
+import com.personal.gymlog.feature.workout.workoutSummary
 import com.personal.gymlog.navigation.AppDestination
 import com.personal.gymlog.navigation.navigateTopLevel
 import java.time.LocalDate
@@ -57,13 +57,7 @@ fun HomeScreen(navController: NavController, repository: GymLogRepository, setti
             }
         }
         item {
-            val workoutText = if (workoutDetails.isEmpty()) "还没有训练记录" else workoutDetails.joinToString("\n\n") { detail ->
-                val sets = detail.exercises.flatMap { exercise -> exercise.sets.filter { it.isCompleted }.map { set ->
-                    "${exercise.exercise.nameSnapshot} · ${set.weightGrams / 1000.0} kg × ${set.reps}"
-                } }
-                val time = "开始于 ${workoutStartTime(detail.session)}"
-                if (sets.isEmpty()) time else "$time\n${sets.joinToString("\n")}"
-            }
+            val workoutText = if (workoutDetails.isEmpty()) "还没有训练记录" else workoutDetails.joinToString("\n\n", transform = ::workoutSummary)
             RecordCard("训练", workoutText) { navController.navigateTopLevel(AppDestination.Workout) }
         }
         item {

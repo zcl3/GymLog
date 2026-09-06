@@ -36,6 +36,10 @@ import com.personal.gymlog.data.settings.SettingsRepository
 import com.personal.gymlog.data.settings.recordDate
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import com.personal.gymlog.data.local.relation.WorkoutDetails
 
 @Composable
 fun WorkoutScreen(repository: GymLogRepository, settingsRepository: SettingsRepository) {
@@ -46,13 +50,27 @@ fun WorkoutScreen(repository: GymLogRepository, settingsRepository: SettingsRepo
     var showAdd by remember { mutableStateOf(false) }
     val settings by settingsRepository.settings.collectAsStateWithLifecycle(AppSettings())
     val selectedDate = settings.recordDate()
-    val todayWorkouts by repository.observeWorkouts(selectedDate).collectAsStateWithLifecycle(emptyList())
-    LaunchedEffect(Unit) { session = repository.inProgress(); available = repository.allExercises(); session?.let { exercises = repository.exercises(it.id) } }
+    val todayWorkoutDetails by repository.observeWorkoutDetails(selectedDate).collectAsStateWithLifecycle(emptyList())
+    var pendingDelete by remember { mutableStateOf<WorkoutDetails?>(null) }
+    LaunchedEffect(selectedDate) {
+        val active = repository.inProgress()?.takeIf { it.trainingDate == selectedDate }
+        session = active
+        exercises = active?.let { repository.exercises(it.id) } ?: emptyList()
+        available = repository.allExercises()
+    }
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("训练", style = MaterialTheme.typography.headlineLarge)
         if (session == null) {
-            Text("开始一次新的训练，记录每个动作和组数。", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Button(onClick = { scope.launch { val id = repository.startWorkout("我的训练", selectedDate); session = repository.inProgress(); exercises = repository.exercises(id) } }) { Text("开始新训练") }
+            LazyColumn(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                item { Text("开始一次新的训练，记录每个动作和组数。", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                item { Button(onClick = { scope.launch { val id = repository.startWorkout("我的训练", selectedDate); session = repository.inProgress(); exercises = repository.exercises(id) } }) { Text("开始新训练") } }
+                if (todayWorkoutDetails.isNotEmpty()) {
+                    item { Text("$selectedDate 的训练记录", style = MaterialTheme.typography.titleLarge) }
+                    items(todayWorkoutDetails, key = { it.session.id }) { detail ->
+                        WorkoutHistoryRow(detail, onDelete = { pendingDelete = detail })
+                    }
+                }
+            }
         } else {
             Text(session!!.name, style = MaterialTheme.typography.titleLarge)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -62,9 +80,44 @@ fun WorkoutScreen(repository: GymLogRepository, settingsRepository: SettingsRepo
                 item { Button(onClick = { scope.launch { repository.completeWorkout(session!!.id); session = null; exercises = emptyList() } }, Modifier.fillMaxWidth()) { Text("完成训练") } }
             }
         }
-        if (session == null && todayWorkouts.isNotEmpty()) Text("$selectedDate 的记录：${todayWorkouts.joinToString { it.name }}")
     }
     if (showAdd && session != null) AddExerciseDialog(available, { showAdd = false }, { exercise -> scope.launch { repository.addWorkoutExercise(session!!.id, exercise, exercises.size); exercises = repository.exercises(session!!.id); showAdd = false } })
+    pendingDelete?.let { detail ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("删除训练记录？") },
+            text = { Text("将删除 ${detail.session.trainingDate} ${workoutStartTime(detail.session)} 的全部动作和组记录。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch { repository.deleteWorkout(detail.session.id); pendingDelete = null }
+                }) { Text("删除") }
+            },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("取消") } },
+        )
+    }
+}
+
+@Composable
+private fun WorkoutHistoryRow(detail: WorkoutDetails, onDelete: () -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(workoutStartTime(detail.session), style = MaterialTheme.typography.titleMedium)
+                TextButton(onClick = onDelete) {
+                    Icon(Icons.Outlined.Delete, contentDescription = "删除训练记录")
+                    Text("删除")
+                }
+            }
+            detail.exercises.forEach { exercise ->
+                Text(exercise.exercise.nameSnapshot, style = MaterialTheme.typography.bodyLarge)
+                exercise.sets.forEach { set ->
+                    val weight = if (set.weightGrams > 0) "${formatWeightKg(set.weightGrams)} kg" else "未填写重量"
+                    val reps = if (set.reps > 0) "${set.reps} 次" else "未填写次数"
+                    Text("第 ${set.position + 1} 组 · $weight × $reps${if (set.isCompleted) "" else "（未完成）"}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    }
 }
 
 @Composable

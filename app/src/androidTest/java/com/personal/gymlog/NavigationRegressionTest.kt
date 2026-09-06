@@ -68,6 +68,7 @@ class NavigationRegressionTest {
         compose.onNode(hasSetTextAction()).performTextClearance()
         compose.onNode(hasSetTextAction()).performTextInput("3000")
         compose.onNodeWithText("保存").performClick()
+        compose.onNodeWithTag("more_list").performScrollToNode(hasText("3000 ml"))
         compose.onNodeWithText("3000 ml").assertIsDisplayed()
     }
 
@@ -118,5 +119,22 @@ class NavigationRegressionTest {
         compose.onNodeWithText("$expectedCount 次").assertIsDisplayed()
         compose.onNodeWithText("累计训练量").assertIsDisplayed()
         compose.onNodeWithText("$expectedVolumeText kg").assertIsDisplayed()
+    }
+
+    @Test fun workoutHistoryCanDeleteACompletedTraining() {
+        val repository = (compose.activity.application as GymLogApplication).repository
+        val date = "2026-02-03"
+        val sessionId = runBlocking {
+            val exerciseId = repository.addExercise("待删除动作", "胸部")
+            val exercise = repository.allExercises().first { it.id == exerciseId }
+            val created = repository.startWorkout("待删除训练", date)
+            val workoutExerciseId = repository.addWorkoutExercise(created, exercise, 0)
+            repository.addSet(workoutExerciseId, 0)
+            repository.completeWorkout(created)
+            created
+        }
+        runBlocking { repository.deleteWorkout(sessionId) }
+        val remaining = runBlocking { repository.observeWorkoutDetails(date).first() }
+        assert(remaining.none { it.session.id == sessionId })
     }
 }

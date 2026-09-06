@@ -35,6 +35,7 @@ class GymLogRepository(private val database: AppDatabase) {
     suspend fun addSet(workoutExerciseId: Long, position: Int): Long = database.workoutDao().insertSet(SetRecord(workoutExerciseId = workoutExerciseId, position = position, weightGrams = 0, reps = 0))
     suspend fun updateSet(record: SetRecord, weightGrams: Int, reps: Int, completed: Boolean) = database.workoutDao().updateSet(record.id, weightGrams, reps, completed, if (completed) System.currentTimeMillis() else null)
     suspend fun completeWorkout(id: Long) = database.workoutDao().complete(id, System.currentTimeMillis())
+    suspend fun deleteWorkout(id: Long) = database.workoutDao().deleteSession(id)
     fun observeHistory(): Flow<List<WorkoutSession>> = database.workoutDao().observeHistory()
     fun observeHistoryDetails(): Flow<List<WorkoutDetails>> = database.workoutDao().observeHistoryDetails()
     fun observeWorkouts(date: String): Flow<List<WorkoutSession>> = database.workoutDao().observeDate(date)
