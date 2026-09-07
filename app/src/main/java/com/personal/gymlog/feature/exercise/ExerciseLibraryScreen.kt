@@ -24,13 +24,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.personal.gymlog.data.local.entity.Exercise
 import com.personal.gymlog.data.repository.GymLogRepository
 
-private val bodyParts = listOf("胸", "背", "腿", "肩", "二头", "三头", "核心", "其他")
+val exerciseBodyPartOptions = listOf("胸", "背", "腿", "肩", "腹", "二头", "三头", "核心", "其他")
 
 @Composable
 fun ExerciseLibraryScreen(repository: GymLogRepository) {
@@ -40,11 +41,11 @@ fun ExerciseLibraryScreen(repository: GymLogRepository) {
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("动作库", style = MaterialTheme.typography.headlineLarge)
         OutlinedTextField(state.query, model::setQuery, Modifier.fillMaxWidth(), label = { Text("搜索动作") }, singleLine = true)
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(Modifier.testTag("exercise_list"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     FilterChip(state.bodyPart == null, { model.setBodyPart(null) }, label = { Text("全部") })
-                    bodyParts.forEach { part -> FilterChip(state.bodyPart == part, { model.setBodyPart(if (state.bodyPart == part) null else part) }, label = { Text(part) }) }
+                    exerciseBodyPartOptions.forEach { part -> FilterChip(state.bodyPart == part, { model.setBodyPart(if (state.bodyPart == part) null else part) }, label = { Text(part) }) }
                 }
             }
             items(state.exercises, key = { it.id }) { exercise -> ExerciseRow(exercise, model::archive) }
@@ -67,14 +68,18 @@ private fun ExerciseRow(exercise: Exercise, onArchive: (Exercise) -> Unit) {
 @Composable
 private fun AddExerciseDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Unit) {
     var name by remember { mutableStateOf("") }
-    var part by remember { mutableStateOf(bodyParts.first()) }
+    var part by remember { mutableStateOf(exerciseBodyPartOptions.first()) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("新建动作") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(name, { name = it }, label = { Text("动作名称") }, singleLine = true)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { bodyParts.take(4).forEach { AssistChip(onClick = { part = it }, label = { Text(if (part == it) "✓ $it" else it) }) } }
+                exerciseBodyPartOptions.take(5).chunked(3).forEach { options ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        options.forEach { option -> AssistChip(onClick = { part = option }, label = { Text(if (part == option) "✓ $option" else option) }) }
+                    }
+                }
             }
         },
         confirmButton = { Button(enabled = name.trim().isNotEmpty(), onClick = { onAdd(name, part); onDismiss() }) { Text("保存") } },

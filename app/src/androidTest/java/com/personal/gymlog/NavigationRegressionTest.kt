@@ -51,6 +51,16 @@ class NavigationRegressionTest {
         }
     }
 
+    @Test fun customExerciseDialogOffersAbdomen() {
+        compose.onNodeWithContentDescription("更多设置").performClick()
+        compose.onNodeWithTag("more_list").performScrollToNode(hasText("动作库"))
+        compose.onNodeWithText("动作库").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("exercise_list").performScrollToNode(hasText("新建自定义动作"))
+        compose.onNodeWithText("新建自定义动作").performClick()
+        compose.onNodeWithText("腹").assertIsDisplayed()
+    }
+
     @Test fun selectedMealAndProteinAreShownAfterSavingFood() {
         compose.onNodeWithContentDescription("饮食", useUnmergedTree = true).performClick()
         compose.onNodeWithText("添加食物").performClick()
